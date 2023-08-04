@@ -18,31 +18,32 @@ const refs = {
 const observer = new IntersectionObserver(onEntry, refs.options)
 let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250 });
 
+refs.form.elements.searchQuery.addEventListener("focus", onFocusInput)
+refs.form.elements.searchQuery.addEventListener("blur", onBlurInput)
+
 function onEntry(entries) {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       getImages(imgParams).then(result => {
           createGallery(result.data);
+          console.log(imgParams.page);
+          console.log(result.data.totalHits / imgParams.per_page);
+          if (imgParams.page >= Math.ceil(result.data.totalHits / imgParams.per_page)) {
+              observer.unobserve(refs.scroll)
+                 Notify.info("Sorry, there are no images matching your search query. Please try again.")
+            }
       });
+    
     }
   });
 }
 
 const createGallery = object => {
-        const totalHits = object.totalHits;
-        const hitsArray = object.hits;
-        if (hitsArray.length === 0) {
-            Notify.failure(
-                'Sorry, there are no images matching your search query. Please try again'
-            );
-        } else {
-            if (imgParams.page === 1) {
-                Notify.success(`Hooray! We found ${totalHits} images`);
-            }
+    const hitsArray = object.hits;
+    
             markupResult(hitsArray, refs.gallery);
             imgParams.page += 1;
         }
-    };
 
 const markupResult = (array, container) => {
         const markup = createMarkup(array);
@@ -89,7 +90,7 @@ function createMarkup(images) {
 }
 
 const onFormSubmit = evt => {
-        observer.disconnect();
+        observer.unobserve(refs.scroll);
         evt.preventDefault();
         imgParams.q = '';
         imgParams.page = 1;
@@ -106,18 +107,29 @@ const eventHandler = evt => {
         imgParams.q = evt.target.elements.searchQuery.value;
         getImages(imgParams).then(result => {
             createGallery(result.data);
-            observer.observe(refs.scroll);
+
+            if (result.data.totalHits === 0) {
+                return Notify.failure(
+                'Sorry, there are no images matching your search query. Please try again')
+            }
+
+            Notify.success(`Hooray! We found ${result.data.totalHits} images`);
+            
+            if (result.data.total > imgParams.per_page) {
+                observer.observe(refs.scroll);
+            } else if (result.data.total > 0) {
+                 Notify.info(
+                     'Sorry, there are no images matching your search query. Please try again')
+                      
+            }
+           
         });
     }
 }
 
-refs.form.elements.searchQuery.addEventListener("focus", onFocusInput)
-
 function onFocusInput(e) {
     e.target.placeholder = "Search images..."
 }
-
-refs.form.elements.searchQuery.addEventListener("blur", onBlurInput)
 
 function onBlurInput(e) {
     e.target.placeholder = ""

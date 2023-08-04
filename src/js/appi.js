@@ -22,7 +22,7 @@ export const getImages = async params => {
     const result = await customAxios.get('', { params });
     return result;
   } catch {
-    Notify.failure(
+    Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
   }
