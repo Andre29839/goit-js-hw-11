@@ -98,6 +98,8 @@ refs.form.addEventListener('submit', onFormSubmit);
 async function eventHandler(evt) {
     if (evt.target.elements.searchQuery.value === '') {
         Notify.info('Please, enter a word for search!');
+    } else if (evt.target.elements.searchQuery.value.trim() === '') {
+        Notify.info('Please, enter a non-empty word for search!');
     } else {
         imgParams.q = evt.target.elements.searchQuery.value;
        const result = await getImages(imgParams);
