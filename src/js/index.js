@@ -96,10 +96,9 @@ const onFormSubmit = async evt => {
 refs.form.addEventListener('submit', onFormSubmit);
 
 async function eventHandler(evt) {
-    if (evt.target.elements.searchQuery.value === '') {
+    if (evt.target.elements.searchQuery.value.trim() === '') {
         Notify.info('Please, enter a word for search!');
-    } else if (evt.target.elements.searchQuery.value.trim() === '') {
-        Notify.info('Please, enter a non-empty word for search!');
+        refs.form.reset()
     } else {
         imgParams.q = evt.target.elements.searchQuery.value;
        const result = await getImages(imgParams);
@@ -116,11 +115,8 @@ async function eventHandler(evt) {
                 observer.observe(refs.scroll);
             } else if (result.data.total > 0) {
                  Notify.info(
-                     'Sorry, there are no images matching your search query. Please try again')
-                      
+                     'Sorry, there are no images matching your search query. Please try again')      
             }
-           
-       
     }
 }
 
