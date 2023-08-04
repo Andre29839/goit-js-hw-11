@@ -3,7 +3,6 @@ import { imgParams, getImages } from './appi.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-
 const refs = {
     form: document.querySelector('#search-form'),
     gallery: document.querySelector('.gallery'),
@@ -21,18 +20,15 @@ let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDe
 refs.form.elements.searchQuery.addEventListener("focus", onFocusInput)
 refs.form.elements.searchQuery.addEventListener("blur", onBlurInput)
 
-function onEntry(entries) {
-  entries.forEach(entry => {
+async function onEntry(entries) {
+  entries.forEach(async entry => {
     if (entry.isIntersecting) {
-      getImages(imgParams).then(result => {
+     const result = await getImages(imgParams);
           createGallery(result.data);
-          console.log(imgParams.page);
-          console.log(result.data.totalHits / imgParams.per_page);
           if (imgParams.page >= Math.ceil(result.data.totalHits / imgParams.per_page)) {
               observer.unobserve(refs.scroll)
                  Notify.info("Sorry, there are no images matching your search query. Please try again.")
             }
-      });
     
     }
   });
@@ -53,7 +49,6 @@ const markupResult = (array, container) => {
 
 
 function createMarkup(images) {
-    console.log(images);
   return images
     .map(
       ({
@@ -89,23 +84,23 @@ function createMarkup(images) {
     .join('');
 }
 
-const onFormSubmit = evt => {
+const onFormSubmit = async evt => {
         observer.unobserve(refs.scroll);
         evt.preventDefault();
         imgParams.q = '';
         imgParams.page = 1;
         refs.gallery.innerHTML = '';
-        eventHandler(evt);
+       await eventHandler(evt);
     };
 
 refs.form.addEventListener('submit', onFormSubmit);
 
-const eventHandler = evt => {
+async function eventHandler(evt) {
     if (evt.target.elements.searchQuery.value === '') {
         Notify.info('Please, enter a word for search!');
     } else {
         imgParams.q = evt.target.elements.searchQuery.value;
-        getImages(imgParams).then(result => {
+       const result = await getImages(imgParams);
             createGallery(result.data);
 
             if (result.data.totalHits === 0) {
@@ -123,7 +118,7 @@ const eventHandler = evt => {
                       
             }
            
-        });
+       
     }
 }
 
