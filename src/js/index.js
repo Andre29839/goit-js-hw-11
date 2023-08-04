@@ -25,11 +25,11 @@ async function onEntry(entries) {
     if (entry.isIntersecting) {
      const result = await getImages(imgParams);
           createGallery(result.data);
-          if (imgParams.page >= Math.ceil(result.data.totalHits / imgParams.per_page)) {
+          if (imgParams.page - 1 >= Math.ceil(result.data.totalHits / imgParams.per_page)) {
               observer.unobserve(refs.scroll)
                  Notify.info("Sorry, there are no images matching your search query. Please try again.")
-            }
-    
+        }
+        
     }
   });
 }
@@ -85,12 +85,13 @@ function createMarkup(images) {
 }
 
 const onFormSubmit = async evt => {
-        observer.unobserve(refs.scroll);
         evt.preventDefault();
+        observer.unobserve(refs.scroll);
         imgParams.q = '';
         imgParams.page = 1;
         refs.gallery.innerHTML = '';
-       await eventHandler(evt);
+    await eventHandler(evt);
+
     };
 
 refs.form.addEventListener('submit', onFormSubmit);
@@ -113,9 +114,6 @@ async function eventHandler(evt) {
             
             if (result.data.total > imgParams.per_page) {
                 observer.observe(refs.scroll);
-            } else if (result.data.total > 0) {
-                 Notify.info(
-                     'Sorry, there are no images matching your search query. Please try again')      
             }
     }
 }
